@@ -1,0 +1,34 @@
+<.flash_group flash={@flash} />
+
+<div class="px-4 py-10 sm:px-6 sm:py-28 lg:px-8 xl:px-28 xl:py-32">
+  <div class="mx-auto max-w-xl text-center">
+    <h1 class="text-brand text-[2rem] flex items-center font-semibold leading-10 justify-center">
+      Live Poker
+      <small class="bg-brand/5 text-[0.8125rem] ml-3 rounded-full px-2 font-medium leading-6">
+        v<%= Application.spec(:live_poker, :vsn) %>
+      </small>
+    </h1>
+    <p class="mt-10 text-base leading-7 text-zinc-600">
+      Planning poker®, also called Scrum poker, is a consensus-based technique for estimating, mostly used to estimate effort or relative size of user stories in software development. In planning poker, members of the group make estimates by playing numbered cards face-down to the table, instead of speaking them aloud. The cards are revealed, and the estimates are then discussed. By hiding the figures in this way, the group can avoid the cognitive bias of anchoring, where the first number spoken aloud sets a precedent for subsequent estimates.
+    </p>
+    <p class="mt-4 text-base leading-7 text-zinc-600">
+      To read more, check out the
+      <a
+        href="https://en.wikipedia.org/wiki/Planning_poker"
+        class="text-brand hover:underline"
+        target="_blank"
+      >
+        Wikipedia
+      </a>
+      page.
+    </p>
+    <div class="mt-10">
+      <a
+        href="/games"
+        class="rounded-2xl px-6 py-4 font-semibold leading-6 text-brand bg-zinc-50 transition hover:bg-zinc-100 sm:py-6"
+      >
+        Play now
+      </a>
+    </div>
+  </div>
+</div>
