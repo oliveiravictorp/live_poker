@@ -8,7 +8,7 @@ defmodule LivePoker.PlayersTest do
 
     import LivePoker.PlayersFixtures
 
-    @invalid_attrs %{name: nil, moderator: nil, spectator: nil}
+    @invalid_attrs %{moderator: nil, spectator: nil}
 
     test "list_players/0 returns all players" do
       player = player_fixture()
@@ -21,10 +21,9 @@ defmodule LivePoker.PlayersTest do
     end
 
     test "create_player/1 with valid data creates a player" do
-      valid_attrs = %{name: "some name", moderator: true, spectator: true}
+      valid_attrs = %{moderator: true, spectator: true}
 
       assert {:ok, %Player{} = player} = Players.create_player(valid_attrs)
-      assert player.name == "some name"
       assert player.moderator == true
       assert player.spectator == true
     end
@@ -35,10 +34,9 @@ defmodule LivePoker.PlayersTest do
 
     test "update_player/2 with valid data updates the player" do
       player = player_fixture()
-      update_attrs = %{name: "some updated name", moderator: false, spectator: false}
+      update_attrs = %{moderator: false, spectator: false}
 
       assert {:ok, %Player{} = player} = Players.update_player(player, update_attrs)
-      assert player.name == "some updated name"
       assert player.moderator == false
       assert player.spectator == false
     end

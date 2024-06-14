@@ -4,7 +4,6 @@ defmodule LivePoker.Repo.Migrations.CreatePlayers do
   def change do
     create table(:players, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :name, :string
       add :moderator, :boolean, default: false, null: false
       add :spectator, :boolean, default: false, null: false
       add :game_id, references(:games, on_delete: :delete_all, type: :binary_id)

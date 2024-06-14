@@ -12,7 +12,6 @@ defmodule LivePoker.PlayersFixtures do
       attrs
       |> Enum.into(%{
         moderator: true,
-        name: "some name",
         spectator: true
       })
       |> LivePoker.Players.create_player()

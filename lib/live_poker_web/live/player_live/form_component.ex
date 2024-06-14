@@ -19,7 +19,6 @@ defmodule LivePokerWeb.PlayerLive.FormComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:moderator]} type="checkbox" label="Moderator" />
         <.input field={@form[:spectator]} type="checkbox" label="Spectator" />
         <:actions>

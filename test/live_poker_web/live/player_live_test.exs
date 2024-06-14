@@ -4,9 +4,9 @@ defmodule LivePokerWeb.PlayerLiveTest do
   import Phoenix.LiveViewTest
   import LivePoker.PlayersFixtures
 
-  @create_attrs %{name: "some name", moderator: true, spectator: true}
-  @update_attrs %{name: "some updated name", moderator: false, spectator: false}
-  @invalid_attrs %{name: nil, moderator: false, spectator: false}
+  @create_attrs %{moderator: true, spectator: true}
+  @update_attrs %{moderator: false, spectator: false}
+  @invalid_attrs %{moderator: false, spectator: false}
 
   defp create_player(_) do
     player = player_fixture()
@@ -20,7 +20,6 @@ defmodule LivePokerWeb.PlayerLiveTest do
       {:ok, _index_live, html} = live(conn, ~p"/players")
 
       assert html =~ "Listing Players"
-      assert html =~ player.name
     end
 
     test "saves new player", %{conn: conn} do
@@ -43,7 +42,6 @@ defmodule LivePokerWeb.PlayerLiveTest do
 
       html = render(index_live)
       assert html =~ "Player created successfully"
-      assert html =~ "some name"
     end
 
     test "updates player in listing", %{conn: conn, player: player} do
@@ -66,7 +64,6 @@ defmodule LivePokerWeb.PlayerLiveTest do
 
       html = render(index_live)
       assert html =~ "Player updated successfully"
-      assert html =~ "some updated name"
     end
 
     test "deletes player in listing", %{conn: conn, player: player} do
@@ -84,7 +81,6 @@ defmodule LivePokerWeb.PlayerLiveTest do
       {:ok, _show_live, html} = live(conn, ~p"/players/#{player}")
 
       assert html =~ "Show Player"
-      assert html =~ player.name
     end
 
     test "updates player within modal", %{conn: conn, player: player} do
@@ -107,7 +103,6 @@ defmodule LivePokerWeb.PlayerLiveTest do
 
       html = render(show_live)
       assert html =~ "Player updated successfully"
-      assert html =~ "some updated name"
     end
   end
 end
