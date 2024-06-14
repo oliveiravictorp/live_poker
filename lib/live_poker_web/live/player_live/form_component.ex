@@ -72,7 +72,7 @@ defmodule LivePokerWeb.PlayerLive.FormComponent do
   defp save_player(socket, :new, player_params) do
     params =
       player_params
-      |> Map.put("user_id", socket.assigns.current_user.id)
+      |> Map.put("user_id", socket.assigns.user_id)
 
     case Players.create_player(params) do
       {:ok, player} ->

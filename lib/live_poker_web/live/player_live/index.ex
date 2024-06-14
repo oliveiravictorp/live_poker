@@ -8,7 +8,10 @@ defmodule LivePokerWeb.PlayerLive.Index do
   def mount(_params, _session, socket) do
     user_id = socket.assigns.current_user.id
 
-    {:ok, stream(socket, :players, Players.list_players(user_id))}
+    {:ok,
+     socket
+     |> assign(user_id: user_id)
+     |> stream(:players, Players.list_players(user_id))}
   end
 
   @impl true
