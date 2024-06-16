@@ -6,7 +6,19 @@ defmodule LivePokerWeb.GameLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :games, Games.list_games())}
+    user_id = socket.assigns.current_user.id
+
+    user_players =
+      LivePoker.Players.list_players(user_id)
+
+    games_list =
+      for user_player <- user_players,
+          do: Games.get_game!(user_player.game_id)
+
+    {:ok,
+     socket
+     |> assign(user_id: user_id)
+     |> stream(:games, games_list)}
   end
 
   @impl true
