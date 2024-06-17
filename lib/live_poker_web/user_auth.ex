@@ -157,7 +157,7 @@ defmodule LivePokerWeb.UserAuth do
     else
       socket =
         socket
-        |> Phoenix.LiveView.put_flash(:info, "You must log in to access this page.")
+        |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
         |> Phoenix.LiveView.redirect(to: ~p"/users/log_in")
 
       {:halt, socket}

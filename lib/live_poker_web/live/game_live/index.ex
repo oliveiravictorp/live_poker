@@ -9,7 +9,7 @@ defmodule LivePokerWeb.GameLive.Index do
     user_id = socket.assigns.current_user.id
 
     user_players =
-      LivePoker.Players.list_players(user_id)
+      LivePoker.Players.list_players_by_user(user_id)
 
     games_list =
       for user_player <- user_players,

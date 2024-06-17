@@ -11,7 +11,7 @@ defmodule LivePokerWeb.PlayerLive.Index do
     {:ok,
      socket
      |> assign(user_id: user_id)
-     |> stream(:players, Players.list_players(user_id))}
+     |> stream(:players, Players.list_players_by_user(user_id))}
   end
 
   @impl true

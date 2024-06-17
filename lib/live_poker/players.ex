@@ -17,11 +17,36 @@ defmodule LivePoker.Players do
       [%Player{}, ...]
 
   """
-  def list_players(user_id) do
+  def list_players_by_user(user_id) do
     Repo.all(
       from p in Player,
         where: p.user_id == ^user_id
     )
+  end
+
+  def list_players_by_game(game_id) do
+    Repo.all(
+      from p in Player,
+        where: p.game_id == ^game_id
+    )
+  end
+
+  def get_player_by_game_and_user(game_id, user_id) do
+    case Repo.one(
+           from p in Player,
+             where:
+               p.game_id == ^game_id and
+                 p.user_id == ^user_id
+         ) do
+      nil ->
+        %{}
+        |> Map.put("user_id", user_id)
+        |> Map.put("game_id", game_id)
+        |> create_player()
+
+      %Player{} = player ->
+        player
+    end
   end
 
   @doc """

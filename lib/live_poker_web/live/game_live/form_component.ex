@@ -72,13 +72,12 @@ defmodule LivePokerWeb.GameLive.FormComponent do
   defp save_game(socket, :new, game_params) do
     case Games.create_game(game_params) do
       {:ok, game} ->
-        params =
-          %{}
-          |> Map.put("user_id", socket.assigns.user_id)
-          |> Map.put("game_id", game.id)
-          |> Map.put("moderator", true)
+        %{}
+        |> Map.put("user_id", socket.assigns.user_id)
+        |> Map.put("game_id", game.id)
+        |> Map.put("moderator", true)
+        |> Players.create_player()
 
-        Players.create_player(params)
         notify_parent({:saved, game})
 
         {:noreply,
