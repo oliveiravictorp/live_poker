@@ -12,6 +12,7 @@ defmodule LivePoker.Repo.Migrations.CreatePlayers do
       timestamps(type: :utc_datetime)
     end
 
-    create index(:players, [:game_id, :user_id])
+    create index(:players, [:game_id])
+    create index(:players, [:user_id])
   end
 end
