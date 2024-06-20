@@ -6,16 +6,16 @@ defmodule LivePoker.Stories.Vote do
   @foreign_key_type :binary_id
   schema "votes" do
     field :estimate, :integer
-    belongs_to :player_id, LivePoker.Players.Player
-    belongs_to :story_id, LivePoker.Stories.Story
+    belongs_to :player, LivePoker.Players.Player
+    belongs_to :story, LivePoker.Stories.Story
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(vote, attrs) do
+  def changeset(vote, attrs \\ %{}) do
     vote
-    |> cast(attrs, [:estimate])
-    |> validate_required([:estimate])
+    |> cast(attrs, [:estimate, :player_id, :story_id])
+    |> validate_required([:estimate, :player_id, :story_id])
   end
 end

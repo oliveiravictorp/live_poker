@@ -17,8 +17,12 @@ defmodule LivePoker.Stories do
       [%Story{}, ...]
 
   """
-  def list_stories do
-    Repo.all(Story)
+  def list_stories(game_id) do
+    Repo.all(
+      from s in Story,
+        where: s.game_id == ^game_id,
+        order_by: s.sequence_number
+    )
   end
 
   @doc """

@@ -7,14 +7,15 @@ defmodule LivePoker.Games.Game do
   schema "games" do
     field :name, :string
     field :description, :string
+    field :quantity_stories, :integer
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(game, attrs) do
+  def changeset(game, attrs \\ %{}) do
     game
-    |> cast(attrs, [:name, :description])
-    |> validate_required([:name])
+    |> cast(attrs, [:name, :description, :quantity_stories])
+    |> validate_required([:name, :quantity_stories])
   end
 end

@@ -23,7 +23,7 @@ defmodule LivePokerWeb.GameLive.FormComponent do
         <.input field={@form[:name]} type="text" label="Game name" />
         <.input field={@form[:description]} type="text" label="Game description (optional)" />
         <:actions>
-          <.button phx-disable-with="Creating...">Create Game</.button>
+          <.button phx-disable-with="Creating...">Create game</.button>
         </:actions>
       </.simple_form>
     </div>
@@ -50,6 +50,7 @@ defmodule LivePokerWeb.GameLive.FormComponent do
     {:noreply, assign_form(socket, changeset)}
   end
 
+  @impl true
   def handle_event("save", %{"game" => game_params}, socket) do
     save_game(socket, socket.assigns.action, game_params)
   end
@@ -70,6 +71,10 @@ defmodule LivePokerWeb.GameLive.FormComponent do
   end
 
   defp save_game(socket, :new, game_params) do
+    game_params =
+      game_params
+      |> Map.put("quantity_stories", 0)
+
     case Games.create_game(game_params) do
       {:ok, game} ->
         %{}

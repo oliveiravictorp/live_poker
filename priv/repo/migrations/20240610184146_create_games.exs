@@ -6,6 +6,7 @@ defmodule LivePoker.Repo.Migrations.CreateGames do
       add :id, :binary_id, primary_key: true
       add :name, :string, null: false
       add :description, :text
+      add :quantity_stories, :integer
 
       timestamps(type: :utc_datetime)
     end

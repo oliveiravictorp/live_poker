@@ -1,15 +1,48 @@
-<container class="flex justify-between">
-  <section>
-    <.back navigate={~p"/games"}>Back to games</.back>
+<container class="flex">
+  <section class="grow pr-7">
+    <%= for story <- @stories do %>
+      <article class="max-w-sm rounded overflow-hidden shadow-lg p-6 mb-4">
+        <%= story.name %>
+      </article>
+    <% end %>
+    <%!-- <.table id="stories" rows={@streams.stories}>
+      <:col :let={{_id, story}} label="Name"><%= story.name %></:col>
+      <:col :let={{_id, story}} label="Description"><%= story.description %></:col>
+    </.table> --%>
+    <%= if @user_player.moderator == true do %>
+      <article class="max-w-sm rounded overflow-hidden shadow-lg pr-6 pb-6 pl-6">
+        <.simple_form
+          for={@story_form}
+          id="story-form"
+          phx-change="validate_story"
+          phx-submit="save_story"
+        >
+          <.input field={@story_form[:name]} type="textarea" label="Story name" />
+          <.input
+            field={@story_form[:description]}
+            type="textarea"
+            label="Story description (optional)"
+          />
+          <:actions>
+            <.button phx-disable-with="Creating...">Add story</.button>
+          </:actions>
+        </.simple_form>
+      </article>
+    <% end %>
+    <article>
+      <.back navigate={~p"/games"}>Back to games</.back>
+    </article>
   </section>
   <aside>
     <.header>
       Game <%= @game.name %>
       <:subtitle><%= @game.description %></:subtitle>
       <:actions>
-        <.link patch={~p"/games/#{@game}/show/edit"} phx-click={JS.push_focus()}>
-          <.button>Edit game</.button>
-        </.link>
+        <%= if @user_player.moderator == true do %>
+          <.link patch={~p"/games/#{@game}/show/edit"} phx-click={JS.push_focus()}>
+            <.button>Edit game</.button>
+          </.link>
+        <% end %>
       </:actions>
     </.header>
 
@@ -21,18 +54,22 @@
       <:col :let={{_id, player}} label="Moderator"><%= player.moderator %></:col>
       <:col :let={{_id, player}} label="Spectator"><%= player.spectator %></:col>
       <:action :let={{_id, player}}>
-        <div class="sr-only">
-          <.link navigate={~p"/players/#{player}"}>Show</.link>
-        </div>
-        <.link patch={~p"/players/#{player}/edit"}>Edit</.link>
+        <%= if @user_player.moderator == true do %>
+          <div class="sr-only">
+            <.link navigate={~p"/players/#{player}"}>Show</.link>
+          </div>
+          <.link patch={~p"/players/#{player}/edit"}>Edit</.link>
+        <% end %>
       </:action>
       <:action :let={{id, player}}>
-        <.link
-          phx-click={JS.push("delete", value: %{id: player.id}) |> hide("##{id}")}
-          data-confirm="Are you sure?"
-        >
-          Delete
-        </.link>
+        <%= if @user_player.moderator == true do %>
+          <.link
+            phx-click={JS.push("delete", value: %{id: player.id}) |> hide("##{id}")}
+            data-confirm="Are you sure?"
+          >
+            Delete
+          </.link>
+        <% end %>
       </:action>
     </.table>
   </aside>
