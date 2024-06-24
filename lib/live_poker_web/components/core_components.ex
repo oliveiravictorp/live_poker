@@ -115,7 +115,7 @@ defmodule LivePokerWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed right-2 mt-2 mr-2 w-80 z-50 rounded-lg p-3 ring-1",
+        "fixed right-2 mt-2 mr-4 w-80 z-50 rounded-lg p-3 ring-1",
         @kind == :info && "bg-emerald-50 text-emerald-800 ring-emerald-500 fill-cyan-900 shadow-md",
         @kind == :warning && "bg-amber-50 text-amber-800 ring-amber-500 fill-amber-900 shadow-md",
         @kind == :error && "bg-rose-50 text-rose-900 ring-rose-500 fill-rose-900 shadow-md"
@@ -207,7 +207,7 @@ defmodule LivePokerWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-10 space-y-8 bg-white">
+      <div class="mt-8 space-y-6 bg-white">
         <%= render_slot(@inner_block, f) %>
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
           <%= render_slot(action, f) %>

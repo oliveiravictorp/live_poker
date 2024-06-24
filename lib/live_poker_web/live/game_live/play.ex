@@ -20,6 +20,13 @@ defmodule LivePokerWeb.GameLive.Play do
     new_story = %Story{}
     change_story = Stories.change_story(new_story)
 
+    stories = Stories.list_stories(game_id)
+    finished_stories = Stories.list_finished_stories(game_id)
+
+    new_story_available = length(stories) - length(finished_stories)
+
+    estimates = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, "?"]
+
     socket
     |> assign(:page_title, "Play game")
     |> assign(:game, Games.get_game!(game_id))
@@ -33,7 +40,9 @@ defmodule LivePokerWeb.GameLive.Play do
     )
     |> assign(:story, new_story)
     |> assign(:story_form, to_form(change_story))
-    |> assign(:stories, Stories.list_stories(game_id))
+    |> assign(:stories, stories)
+    |> assign(:estimates, estimates)
+    |> assign(:new_story_available, new_story_available)
   end
 
   defp apply_action(socket, :edit_game, %{"game_id" => game_id}) do
@@ -89,6 +98,26 @@ defmodule LivePokerWeb.GameLive.Play do
          socket
          |> assign(:story_form, to_form(change_story))}
     end
+  end
+
+  @impl true
+  def handle_event("accept_story", %{"id" => id, "game_id" => game_id}, socket) do
+    attrs =
+      %{}
+      |> Map.put("finished", true)
+
+    Stories.get_story!(id)
+    |> Stories.update_story(attrs)
+
+    {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
+  end
+
+  @impl true
+  def handle_event("delete_story", %{"id" => id}, socket) do
+    story = Stories.get_story!(id)
+    {:ok, _} = Stories.delete_story(story)
+
+    {:noreply, stream_delete(socket, :stories, story)}
   end
 
   @impl true

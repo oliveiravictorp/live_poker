@@ -1,7 +1,7 @@
 <container class="flex">
-  <section class="grow">
+  <section class="grow pr-7">
     <%= if @user_player.moderator == true do %>
-      <article class="max-w-md rounded overflow-hidden shadow-lg pr-6 pb-6 pl-6">
+      <article class="rounded overflow-hidden shadow-lg pr-6 pb-6 pl-6">
         <.simple_form
           for={@story_form}
           id="story-form"
@@ -15,18 +15,55 @@
             label="Story description (optional)"
           />
           <:actions>
-            <.button phx-disable-with="Creating...">Add story</.button>
+            <%= if @new_story_available == 0 do %>
+              <.button>Add story</.button>
+            <% else %>
+              <.button disabled>Add story</.button>
+              <%= if @stories != [] do %>
+                Finish the current story before creating the next one
+              <% end %>
+            <% end %>
           </:actions>
         </.simple_form>
       </article>
     <% end %>
     <%= for story <- @stories do %>
-      <article class="max-w-md rounded overflow-hidden shadow-lg p-6 mb-4">
-        <%= story.name %>
+      <article class="rounded overflow-hidden shadow-lg p-6 mb-4">
+        <.header>
+          <%= story.name %>
+          <:subtitle><%= story.description %></:subtitle>
+        </.header>
+        <%= if story.finished == false do %>
+          <div class="text-center rounded overflow-hidden shadow-lg p-5 mb-3">
+            Select your estimate
+          </div>
+          <div class="flex rounded overflow-hidden shadow-lg p-5 mb-3">
+            <%= for estimate <- @estimates do %>
+              <div class="w-9 text-center rounded overflow-hidden shadow-lg p-2 mr-2">
+                <%= estimate %>
+              </div>
+            <% end %>
+          </div>
+          <div class="rounded overflow-hidden shadow-lg p-5 mb-3">
+            <.button phx-click={
+              JS.push("accept_story", value: %{id: story.id, game_id: @game.id})
+            }>
+              Accept round
+            </.button>
+            <.button>Play again</.button>
+            <.button>Reveal cards</.button>
+            <.button
+              phx-click={JS.push("delete_story", value: %{id: story.id})}
+              data-confirm="Are you sure?"
+            >
+              Cancel round
+            </.button>
+          </div>
+        <% end %>
       </article>
     <% end %>
   </section>
-  <aside>
+  <aside class="max-w-72">
     <article>
       <.back navigate={~p"/games"}>Back to games</.back>
     </article>

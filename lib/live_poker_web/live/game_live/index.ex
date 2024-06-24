@@ -12,8 +12,10 @@ defmodule LivePokerWeb.GameLive.Index do
       LivePoker.Players.list_players_by_user(user_id)
 
     games_list =
-      for user_player <- user_players,
-          do: Games.get_game!(user_player.game_id)
+      for user_player <- user_players do
+        Games.get_game!(user_player.game_id)
+        |> check_moderator(user_player)
+      end
 
     {:ok,
      socket
@@ -26,10 +28,10 @@ defmodule LivePokerWeb.GameLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :edit, %{"id" => id}) do
+  defp apply_action(socket, :edit, %{"game_id" => game_id}) do
     socket
     |> assign(:page_title, "Edit game")
-    |> assign(:game, Games.get_game!(id))
+    |> assign(:game, Games.get_game!(game_id))
   end
 
   defp apply_action(socket, :new, _params) do
@@ -55,5 +57,15 @@ defmodule LivePokerWeb.GameLive.Index do
     {:ok, _} = Games.delete_game(game)
 
     {:noreply, stream_delete(socket, :games, game)}
+  end
+
+  defp check_moderator(game, user_player) do
+    if user_player.moderator == true do
+      game
+      |> Map.put(:moderator, true)
+    else
+      game
+      |> Map.put(:moderator, false)
+    end
   end
 end

@@ -25,6 +25,15 @@ defmodule LivePoker.Stories do
     )
   end
 
+  def list_finished_stories(game_id) do
+    Repo.all(
+      from s in Story,
+        where:
+          s.game_id == ^game_id and
+            s.finished == true
+    )
+  end
+
   @doc """
   Gets a single story.
 
