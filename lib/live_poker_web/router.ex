@@ -71,17 +71,12 @@ defmodule LivePokerWeb.Router do
 
       live "/games", GameLive.Index, :index
       live "/games/new", GameLive.Index, :new
-      live "/games/:id/edit", GameLive.Index, :edit
+      live "/games/:game_id/edit", GameLive.Index, :edit
 
-      live "/games/:id", GameLive.Show, :show
-      live "/games/:id/show/edit", GameLive.Show, :edit
-
-      live "/players", PlayerLive.Index, :index
-      live "/players/new", PlayerLive.Index, :new
-      live "/players/:id/edit", PlayerLive.Index, :edit
-
-      live "/players/:id", PlayerLive.Show, :show
-      live "/players/:id/show/edit", PlayerLive.Show, :edit
+      live "/game/:game_id", GameLive.Play, :play
+      live "/game/:game_id/edit", GameLive.Play, :edit_game
+      live "/game/:game_id/player/:player_id/edit", GameLive.Play, :edit_player
+      live "/game/:game_id/story/:story_id/edit", GameLive.Play, :edit_story
     end
   end
 

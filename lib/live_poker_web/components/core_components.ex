@@ -115,7 +115,7 @@ defmodule LivePokerWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed mt-2 right-2 mr-2 w-80 z-50 rounded-lg p-3 ring-1",
+        "fixed right-2 mt-2 mr-2 w-80 z-50 rounded-lg p-3 ring-1",
         @kind == :info && "bg-emerald-50 text-emerald-800 ring-emerald-500 fill-cyan-900 shadow-md",
         @kind == :warning && "bg-amber-50 text-amber-800 ring-amber-500 fill-amber-900 shadow-md",
         @kind == :error && "bg-rose-50 text-rose-900 ring-rose-500 fill-rose-900 shadow-md"
@@ -564,7 +564,7 @@ defmodule LivePokerWeb.CoreComponents do
 
   def back(assigns) do
     ~H"""
-    <div class="mt-16">
+    <div class="mb-3">
       <.link
         navigate={@navigate}
         class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"

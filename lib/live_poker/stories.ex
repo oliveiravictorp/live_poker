@@ -21,7 +21,7 @@ defmodule LivePoker.Stories do
     Repo.all(
       from s in Story,
         where: s.game_id == ^game_id,
-        order_by: s.sequence_number
+        order_by: [desc: s.sequence_number]
     )
   end
 

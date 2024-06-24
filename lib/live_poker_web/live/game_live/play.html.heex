@@ -1,16 +1,7 @@
 <container class="flex">
-  <section class="grow pr-7">
-    <%= for story <- @stories do %>
-      <article class="max-w-sm rounded overflow-hidden shadow-lg p-6 mb-4">
-        <%= story.name %>
-      </article>
-    <% end %>
-    <%!-- <.table id="stories" rows={@streams.stories}>
-      <:col :let={{_id, story}} label="Name"><%= story.name %></:col>
-      <:col :let={{_id, story}} label="Description"><%= story.description %></:col>
-    </.table> --%>
+  <section class="grow">
     <%= if @user_player.moderator == true do %>
-      <article class="max-w-sm rounded overflow-hidden shadow-lg pr-6 pb-6 pl-6">
+      <article class="max-w-md rounded overflow-hidden shadow-lg pr-6 pb-6 pl-6">
         <.simple_form
           for={@story_form}
           id="story-form"
@@ -29,42 +20,40 @@
         </.simple_form>
       </article>
     <% end %>
+    <%= for story <- @stories do %>
+      <article class="max-w-md rounded overflow-hidden shadow-lg p-6 mb-4">
+        <%= story.name %>
+      </article>
+    <% end %>
+  </section>
+  <aside>
     <article>
       <.back navigate={~p"/games"}>Back to games</.back>
     </article>
-  </section>
-  <aside>
     <.header>
-      Game <%= @game.name %>
+      Play Game <%= @game.name %>
       <:subtitle><%= @game.description %></:subtitle>
       <:actions>
         <%= if @user_player.moderator == true do %>
-          <.link patch={~p"/games/#{@game}/show/edit"} phx-click={JS.push_focus()}>
+          <.link patch={~p"/game/#{@game}/edit"} phx-click={JS.push_focus()}>
             <.button>Edit game</.button>
           </.link>
         <% end %>
       </:actions>
     </.header>
 
-    <.table
-      id="players"
-      rows={@streams.players}
-      row_click={fn {_id, player} -> JS.navigate(~p"/players/#{player}") end}
-    >
+    <.table id="players" rows={@streams.players}>
       <:col :let={{_id, player}} label="Moderator"><%= player.moderator %></:col>
       <:col :let={{_id, player}} label="Spectator"><%= player.spectator %></:col>
       <:action :let={{_id, player}}>
         <%= if @user_player.moderator == true do %>
-          <div class="sr-only">
-            <.link navigate={~p"/players/#{player}"}>Show</.link>
-          </div>
-          <.link patch={~p"/players/#{player}/edit"}>Edit</.link>
+          <.link patch={~p"/game/#{@game}/player/#{player}/edit"}>Edit</.link>
         <% end %>
       </:action>
       <:action :let={{id, player}}>
         <%= if @user_player.moderator == true do %>
           <.link
-            phx-click={JS.push("delete", value: %{id: player.id}) |> hide("##{id}")}
+            phx-click={JS.push("delete_player", value: %{id: player.id}) |> hide("##{id}")}
             data-confirm="Are you sure?"
           >
             Delete
@@ -74,13 +63,33 @@
     </.table>
   </aside>
 </container>
-<.modal :if={@live_action == :edit} id="game-modal" show on_cancel={JS.patch(~p"/games/#{@game}")}>
+<.modal
+  :if={@live_action == :edit_game}
+  id="game-modal"
+  show
+  on_cancel={JS.patch(~p"/game/#{@game}")}
+>
   <.live_component
     module={LivePokerWeb.GameLive.FormComponent}
     id={@game.id}
     title={@page_title}
     action={@live_action}
     game={@game}
-    patch={~p"/games/#{@game}"}
+    patch={~p"/game/#{@game}"}
+  />
+</.modal>
+<.modal
+  :if={@live_action == :edit_player}
+  id="player-modal"
+  show
+  on_cancel={JS.patch(~p"/game/#{@game}")}
+>
+  <.live_component
+    module={LivePokerWeb.GameLive.PlayerComponent}
+    id={@player.id}
+    title={@page_title}
+    action={@live_action}
+    player={@player}
+    patch={~p"/game/#{@game}"}
   />
 </.modal>

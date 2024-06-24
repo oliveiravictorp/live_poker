@@ -1,4 +1,4 @@
-defmodule LivePokerWeb.PlayerLive.FormComponent do
+defmodule LivePokerWeb.GameLive.PlayerComponent do
   use LivePokerWeb, :live_component
 
   alias LivePoker.Players
@@ -53,7 +53,7 @@ defmodule LivePokerWeb.PlayerLive.FormComponent do
     save_player(socket, socket.assigns.action, player_params)
   end
 
-  defp save_player(socket, :edit, player_params) do
+  defp save_player(socket, :edit_player, player_params) do
     case Players.update_player(socket.assigns.player, player_params) do
       {:ok, player} ->
         notify_parent({:saved, player})

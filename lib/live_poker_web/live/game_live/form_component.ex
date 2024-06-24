@@ -55,7 +55,7 @@ defmodule LivePokerWeb.GameLive.FormComponent do
     save_game(socket, socket.assigns.action, game_params)
   end
 
-  defp save_game(socket, :edit, game_params) do
+  defp save_game(socket, [:edit, :edit_game], game_params) do
     case Games.update_game(socket.assigns.game, game_params) do
       {:ok, game} ->
         notify_parent({:saved, game})

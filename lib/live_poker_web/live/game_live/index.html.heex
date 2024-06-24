@@ -10,14 +10,11 @@
 <.table
   id="games"
   rows={@streams.games}
-  row_click={fn {_id, game} -> JS.navigate(~p"/games/#{game}") end}
+  row_click={fn {_id, game} -> JS.navigate(~p"/game/#{game}") end}
 >
   <:col :let={{_id, game}} label="Name"><%= game.name %></:col>
   <:col :let={{_id, game}} label="Description"><%= game.description %></:col>
   <:action :let={{_id, game}}>
-    <div class="sr-only">
-      <.link navigate={~p"/games/#{game}"}>Show</.link>
-    </div>
     <.link patch={~p"/games/#{game}/edit"}>Edit</.link>
   </:action>
   <:action :let={{id, game}}>
