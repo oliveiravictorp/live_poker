@@ -29,17 +29,44 @@
     <% end %>
     <%= for story <- @stories do %>
       <article class="rounded overflow-hidden shadow-lg p-6 mb-4">
-        <.header>
+        <.header class="mb-3">
           <%= story.name %>
           <:subtitle><%= story.description %></:subtitle>
         </.header>
         <%= if story.finished == false do %>
-          <div class="text-center rounded overflow-hidden shadow-lg p-5 mb-3">
-            Select your estimate
+          <div class="flex flex-wrap text-center rounded overflow-hidden shadow-lg p-5 mb-3">
+            <%!-- <%= if @votes == nil do %>
+              Select your estimate
+            <% else %> --%>
+            <%= for vote <- @votes do %>
+              <div class="w-24 m-3">
+                <div class="text-center bg-gray-100 rounded overflow-hidden border-2 px-4 py-8">
+                  <%= if vote.estimate == 0 do
+                    "?"
+                  else
+                    vote.estimate
+                  end %>
+                </div>
+                <span class="font-bold text-sm"><%= vote.player_id %></span>
+              </div>
+            <% end %>
+            <%!-- <% end %> --%>
           </div>
           <div class="flex rounded overflow-hidden shadow-lg p-5 mb-3">
             <%= for estimate <- @estimates do %>
-              <div class="w-9 text-center rounded overflow-hidden shadow-lg p-2 mr-2">
+              <div
+                phx-click={
+                  JS.push("estimate_vote",
+                    value: %{
+                      estimate: estimate,
+                      player_id: @user_player.id,
+                      story_id: @current_story.id,
+                      game_id: @game.id
+                    }
+                  )
+                }
+                class="w-9 text-center rounded overflow-hidden shadow-lg p-2 mr-2"
+              >
                 <%= estimate %>
               </div>
             <% end %>
@@ -80,8 +107,9 @@
     </.header>
 
     <.table id="players" rows={@streams.players}>
-      <:col :let={{_id, player}} label="Moderator"><%= player.moderator %></:col>
-      <:col :let={{_id, player}} label="Spectator"><%= player.spectator %></:col>
+      <:col :let={{_id, player}} label="Id"><%= player.id %></:col>
+      <%!-- <:col :let={{_id, player}} label="Moderator"><%= player.moderator %></:col>
+      <:col :let={{_id, player}} label="Spectator"><%= player.spectator %></:col> --%>
       <:action :let={{_id, player}}>
         <%= if @user_player.moderator == true do %>
           <.link patch={~p"/game/#{@game}/player/#{player}/edit"}>Edit</.link>

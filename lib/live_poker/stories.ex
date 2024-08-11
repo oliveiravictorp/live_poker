@@ -34,6 +34,15 @@ defmodule LivePoker.Stories do
     )
   end
 
+  def get_current_story(game_id) do
+    Repo.one(
+      from s in Story,
+        where:
+          s.game_id == ^game_id and
+            s.finished == false
+    )
+  end
+
   @doc """
   Gets a single story.
 
@@ -126,8 +135,11 @@ defmodule LivePoker.Stories do
       [%Vote{}, ...]
 
   """
-  def list_votes do
-    Repo.all(Vote)
+  def list_votes(story_id) do
+    Repo.all(
+      from v in Vote,
+        where: v.story_id == ^story_id
+    )
   end
 
   @doc """
@@ -145,6 +157,16 @@ defmodule LivePoker.Stories do
 
   """
   def get_vote!(id), do: Repo.get!(Vote, id)
+
+  def get_vote_by_player(player_id, story_id) do
+    Repo.one(
+      from v in Vote,
+        where:
+          v.player_id == ^player_id and
+            v.story_id == ^story_id
+    )
+    |> IO.inspect(label: "#{__MODULE__}:#{__ENV__.line} #{DateTime.utc_now()}", limit: :infinity)
+  end
 
   @doc """
   Creates a vote.

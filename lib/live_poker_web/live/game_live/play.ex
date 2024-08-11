@@ -22,10 +22,20 @@ defmodule LivePokerWeb.GameLive.Play do
 
     stories = Stories.list_stories(game_id)
     finished_stories = Stories.list_finished_stories(game_id)
-
     new_story_available = length(stories) - length(finished_stories)
 
     estimates = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, "?"]
+
+    current_story = Stories.get_current_story(game_id)
+
+    votes =
+      case current_story do
+        nil ->
+          nil
+
+        %Story{} = current_story ->
+          Stories.list_votes(current_story.id)
+      end
 
     socket
     |> assign(:page_title, "Play game")
@@ -41,6 +51,8 @@ defmodule LivePokerWeb.GameLive.Play do
     |> assign(:story, new_story)
     |> assign(:story_form, to_form(change_story))
     |> assign(:stories, stories)
+    |> assign(:current_story, current_story)
+    |> assign(:votes, votes)
     |> assign(:estimates, estimates)
     |> assign(:new_story_available, new_story_available)
   end
@@ -108,6 +120,43 @@ defmodule LivePokerWeb.GameLive.Play do
 
     Stories.get_story!(id)
     |> Stories.update_story(attrs)
+
+    {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
+  end
+
+  @impl true
+  def handle_event(
+        "estimate_vote",
+        %{
+          "estimate" => estimate,
+          "player_id" => player_id,
+          "story_id" => story_id,
+          "game_id" => game_id
+        },
+        socket
+      ) do
+    attrs =
+      %{}
+      |> Map.put(
+        "estimate",
+        if estimate == "?" do
+          0
+        else
+          estimate
+        end
+      )
+
+    case Stories.get_vote_by_player(player_id, story_id) do
+      nil ->
+        Stories.create_vote(
+          attrs
+          |> Map.put("player_id", player_id)
+          |> Map.put("story_id", story_id)
+        )
+
+      %Stories.Vote{} = vote ->
+        Stories.update_vote(vote, attrs)
+    end
 
     {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
   end
