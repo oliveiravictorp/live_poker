@@ -75,6 +75,7 @@ defmodule LivePoker.Stories do
     %Story{}
     |> Story.changeset(attrs)
     |> Repo.insert()
+    |> broadcast(:story_created)
   end
 
   @doc """
@@ -93,6 +94,7 @@ defmodule LivePoker.Stories do
     story
     |> Story.changeset(attrs)
     |> Repo.update()
+    |> broadcast(:story_created)
   end
 
   @doc """
@@ -231,5 +233,16 @@ defmodule LivePoker.Stories do
   """
   def change_vote(%Vote{} = vote, attrs \\ %{}) do
     Vote.changeset(vote, attrs)
+  end
+
+  def subscribe() do
+    Phoenix.PubSub.subscribe(LivePoker.PubSub, "stories")
+  end
+
+  defp broadcast({:error, _reason} = error, _event), do: error
+
+  defp broadcast({:ok, story}, event) do
+    Phoenix.PubSub.broadcast(LivePoker.PubSub, "stories", {event, story})
+    {:ok, story}
   end
 end

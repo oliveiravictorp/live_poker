@@ -17,6 +17,8 @@ defmodule LivePokerWeb.GameLive.Play do
   end
 
   defp apply_action(socket, :play, %{"game_id" => game_id}) do
+    if connected?(socket), do: Stories.subscribe()
+
     new_story = %Story{}
     change_story = Stories.change_story(new_story)
 
@@ -67,6 +69,11 @@ defmodule LivePokerWeb.GameLive.Play do
     socket
     |> assign(:page_title, "Edit player")
     |> assign(:player, Players.get_player!(player_id))
+  end
+
+  @impl true
+  def handle_info({:story_created, story}, socket) do
+    {:noreply, stream_insert(socket, :stories, story)}
   end
 
   @impl true
