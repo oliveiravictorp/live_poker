@@ -47,7 +47,7 @@
                     vote.estimate
                   end %>
                 </div>
-                <span class="font-bold text-sm"><%= vote.player_id %></span>
+                <span class="font-bold text-sm"><%= vote.player.user.name %></span>
               </div>
             <% end %>
             <%!-- <% end %> --%>
@@ -107,7 +107,7 @@
     </.header>
 
     <.table id="players" rows={@streams.players}>
-      <:col :let={{_id, player}} label="Id"><%= player.id %></:col>
+      <:col :let={{_id, player}} label="Players"><%= player.user.name %></:col>
       <%!-- <:col :let={{_id, player}} label="Moderator"><%= player.moderator %></:col>
       <:col :let={{_id, player}} label="Spectator"><%= player.spectator %></:col> --%>
       <:action :let={{_id, player}}>

@@ -142,6 +142,7 @@ defmodule LivePoker.Stories do
       from v in Vote,
         where: v.story_id == ^story_id
     )
+    |> Repo.preload(player: :user)
   end
 
   @doc """

@@ -29,6 +29,7 @@ defmodule LivePoker.Players do
       from p in Player,
         where: p.game_id == ^game_id
     )
+    |> Repo.preload(:user)
   end
 
   def get_player_by_game_and_user(game_id, user_id) do
