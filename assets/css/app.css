@@ -3,3 +3,7 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+.card-facedown {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAANklEQVQYV2NkIAIwEqHmPyFF/4GGMBJSBLYIlyKwCTCnYFOEogCfSSj+QTYJwwR063AqACkEAGnjBgmbf5VOAAAAAElFTkSuQmCC)
+    repeat;
+}

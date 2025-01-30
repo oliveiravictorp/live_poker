@@ -40,14 +40,19 @@
             <% else %> --%>
             <%= for vote <- @votes do %>
               <div class="w-24 m-3">
-                <div class="text-center bg-gray-100 rounded overflow-hidden border-2 px-4 py-8">
-                  <%= if vote.estimate == 0 do
-                    "?"
-                  else
-                    vote.estimate
-                  end %>
-                </div>
-                <span class="font-bold text-sm"><%= vote.player.user.name %></span>
+                <%= if story.final_estimate > 0 or @current_user == vote.player.user do %>
+                  <div class="text-center bg-gray-100 rounded overflow-hidden border-2 px-4 py-9 mb-1 font-bold">
+                    <%= if vote.estimate == 0 do
+                      "?"
+                    else
+                      vote.estimate
+                    end %>
+                  </div>
+                <% else %>
+                  <div class="card-facedown text-center bg-gray-300 rounded overflow-hidden border-2 px-4 py-12 mb-1">
+                  </div>
+                <% end %>
+                <span class="text-sm"><%= vote.player.user.name %></span>
               </div>
             <% end %>
             <%!-- <% end %> --%>
@@ -65,27 +70,36 @@
                     }
                   )
                 }
-                class="w-9 text-center rounded overflow-hidden shadow-lg p-2 mr-2"
+                class="w-9 text-center rounded overflow-hidden shadow-lg p-2 mr-2 cursor-pointer"
               >
                 <%= estimate %>
               </div>
             <% end %>
           </div>
-          <div class="rounded overflow-hidden shadow-lg p-5 mb-3">
-            <.button phx-click={
-              JS.push("accept_story", value: %{id: story.id, game_id: @game.id})
-            }>
-              Accept round
-            </.button>
-            <.button>Play again</.button>
-            <.button>Reveal cards</.button>
-            <.button
-              phx-click={JS.push("delete_story", value: %{id: story.id})}
-              data-confirm="Are you sure?"
-            >
-              Cancel round
-            </.button>
-          </div>
+          <%= if @user_player.moderator == true do %>
+            <div class="rounded overflow-hidden shadow-lg p-5 mb-3">
+              <span class="mr-2 text-center bg-gray-100 rounded overflow-hidden border-2 px-3 py-2">
+                <%= story.final_estimate %>
+              </span>
+              <.button phx-click={
+                JS.push("accept_story", value: %{id: story.id, game_id: @game.id})
+              }>
+                Accept round
+              </.button>
+              <.button>Play again</.button>
+              <.button phx-click={
+                JS.push("reveal_cards", value: %{id: story.id, game_id: @game.id})
+              }>
+                Reveal cards
+              </.button>
+              <.button
+                phx-click={JS.push("delete_story", value: %{id: story.id})}
+                data-confirm="Are you sure?"
+              >
+                Cancel round
+              </.button>
+            </div>
+          <% end %>
         <% end %>
       </article>
     <% end %>

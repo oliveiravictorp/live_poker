@@ -132,6 +132,13 @@ defmodule LivePokerWeb.GameLive.Play do
   end
 
   @impl true
+  def handle_event("reveal_cards", %{"id" => id, "game_id" => game_id}, socket) do
+    calc_final_estimate(id)
+
+    {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
+  end
+
+  @impl true
   def handle_event(
         "estimate_vote",
         %{
@@ -165,6 +172,18 @@ defmodule LivePokerWeb.GameLive.Play do
         Stories.update_vote(vote, attrs)
     end
 
+    votes_qtt =
+      Stories.list_votes(story_id)
+      |> length()
+
+    players_qtt =
+      Players.list_players_by_game(game_id)
+      |> length()
+
+    if votes_qtt == players_qtt do
+      calc_final_estimate(story_id)
+    end
+
     {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
   end
 
@@ -185,4 +204,20 @@ defmodule LivePokerWeb.GameLive.Play do
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+
+  defp calc_final_estimate(story_id) do
+    final_estimate =
+      Stories.list_votes(story_id)
+      |> Enum.map(& &1.estimate)
+      |> Enum.frequencies()
+      |> Enum.max_by(fn {_value, count} -> count end)
+      |> elem(0)
+
+    attrs =
+      %{}
+      |> Map.put("final_estimate", final_estimate)
+
+    Stories.get_story!(story_id)
+    |> Stories.update_story(attrs)
+  end
 end
