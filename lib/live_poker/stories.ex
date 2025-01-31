@@ -223,6 +223,11 @@ defmodule LivePoker.Stories do
     Repo.delete(vote)
   end
 
+  def delete_all_votes(story_id) do
+    query = from(v in Vote, where: v.story_id == ^story_id)
+    Repo.delete_all(query)
+  end
+
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking vote changes.
 

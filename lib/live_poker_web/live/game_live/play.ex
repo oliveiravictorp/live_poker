@@ -132,6 +132,20 @@ defmodule LivePokerWeb.GameLive.Play do
   end
 
   @impl true
+  def handle_event("restart_story", %{"id" => id, "game_id" => game_id}, socket) do
+    Stories.delete_all_votes(id)
+
+    attrs =
+      %{}
+      |> Map.put("final_estimate", 0)
+
+    Stories.get_story!(id)
+    |> Stories.update_story(attrs)
+
+    {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
+  end
+
+  @impl true
   def handle_event("reveal_cards", %{"id" => id, "game_id" => game_id}, socket) do
     calc_final_estimate(id)
 

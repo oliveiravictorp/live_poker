@@ -32,6 +32,11 @@
         <.header class="mb-3">
           <%= story.name %>
           <:subtitle><%= story.description %></:subtitle>
+          <%= if story.finished == true do %>
+            <span class="float-right">
+              Estimate: <%= story.final_estimate %>
+            </span>
+          <% end %>
         </.header>
         <%= if story.finished == false do %>
           <div class="flex flex-wrap text-center rounded overflow-hidden shadow-lg p-5 mb-3">
@@ -86,7 +91,11 @@
               }>
                 Accept round
               </.button>
-              <.button>Play again</.button>
+              <.button phx-click={
+                JS.push("restart_story", value: %{id: story.id, game_id: @game.id})
+              }>
+                Play again
+              </.button>
               <.button phx-click={
                 JS.push("reveal_cards", value: %{id: story.id, game_id: @game.id})
               }>
