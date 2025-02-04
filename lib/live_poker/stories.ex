@@ -168,7 +168,6 @@ defmodule LivePoker.Stories do
           v.player_id == ^player_id and
             v.story_id == ^story_id
     )
-    |> IO.inspect(label: "#{__MODULE__}:#{__ENV__.line} #{DateTime.utc_now()}", limit: :infinity)
   end
 
   @doc """

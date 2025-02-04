@@ -17,7 +17,8 @@ defmodule LivePoker.Application do
       # Start a worker by calling: LivePoker.Worker.start_link(arg)
       # {LivePoker.Worker, arg},
       # Start to serve requests, typically the last entry
-      LivePokerWeb.Endpoint
+      LivePokerWeb.Endpoint,
+      LivePoker.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
