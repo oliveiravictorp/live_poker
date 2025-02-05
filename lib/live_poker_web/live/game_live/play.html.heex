@@ -1,6 +1,6 @@
 <container class="flex">
   <section class="grow pr-7">
-    <%= if @user_player.moderator == true do %>
+    <%= if @is_moderator do %>
       <article class="rounded overflow-hidden shadow-lg pr-6 pb-6 pl-6">
         <.simple_form
           for={@story_form}
@@ -82,7 +82,7 @@
               </div>
             <% end %>
           </div>
-          <%= if @user_player.moderator == true do %>
+          <%= if @is_moderator do %>
             <div class="rounded overflow-hidden shadow-lg p-5 mb-3">
               <span class="mr-2 text-center bg-gray-100 rounded overflow-hidden border-2 px-3 py-2">
                 <%= story.final_estimate %>
@@ -122,7 +122,7 @@
       Play Game <%= @game.name %>
       <:subtitle><%= @game.description %></:subtitle>
       <:actions>
-        <%= if @user_player.moderator == true do %>
+        <%= if @is_moderator do %>
           <.link patch={~p"/game/#{@game}/edit"} phx-click={JS.push_focus()}>
             <.button>Edit game</.button>
           </.link>
@@ -142,12 +142,12 @@
       <:col :let={{_id, player}} label="Spectator"><%= player.spectator %></:col>
       --%>
       <:action :let={{_id, player}}>
-        <%= if @user_player.moderator == true do %>
+        <%= if @is_moderator do %>
           <.link patch={~p"/game/#{@game}/player/#{player}/edit"}>Edit</.link>
         <% end %>
       </:action>
       <:action :let={{id, player}}>
-        <%= if @user_player.moderator == true do %>
+        <%= if @is_moderator do %>
           <.link
             phx-click={JS.push("delete_player", value: %{id: player.id}) |> hide("##{id}")}
             data-confirm="Are you sure?"

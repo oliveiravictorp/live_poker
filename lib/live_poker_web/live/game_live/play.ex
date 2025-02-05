@@ -9,10 +9,6 @@ defmodule LivePokerWeb.GameLive.Play do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket =
-      socket
-      |> stream(:stories, [])
-
     {:ok, socket}
   end
 
@@ -51,17 +47,15 @@ defmodule LivePokerWeb.GameLive.Play do
     Presence.track(self(), topic, user.id, user)
     presences = Presence.list(topic)
 
+    {:ok, player} = Players.get_player_by_game_and_user(game_id, user.id)
+    is_moderator = Players.is_moderator?(player)
+
     socket
     |> assign(:page_title, "Play game")
     |> assign(:game, Games.get_game!(game_id))
     |> stream(:players, Players.list_players_by_game(game_id))
-    |> assign(
-      :user_player,
-      Players.get_player_by_game_and_user(
-        game_id,
-        socket.assigns.current_user.id
-      )
-    )
+    |> assign(:user_player, player)
+    |> assign(:is_moderator, is_moderator)
     |> assign(:presences, presences)
     |> assign(:topic, topic)
     |> assign(:story, new_story)
@@ -93,7 +87,17 @@ defmodule LivePokerWeb.GameLive.Play do
 
   @impl true
   def handle_info({:story_created, story}, socket) do
-    {:noreply, stream_insert(socket, :stories, story)}
+    {:noreply, assign(socket, story: story)}
+  end
+
+  @impl true
+  def handle_info({__MODULE__, {:saved, story}}, socket) do
+    {:noreply, assign(socket, story: story)}
+  end
+
+  @impl true
+  def handle_info({LivePokerWeb.GameLive.FormComponent, {:saved, game}}, socket) do
+    {:noreply, assign(socket, game: game)}
   end
 
   @impl true
@@ -224,7 +228,9 @@ defmodule LivePokerWeb.GameLive.Play do
     story = Stories.get_story!(id)
     {:ok, _} = Stories.delete_story(story)
 
-    {:noreply, stream_delete(socket, :stories, story)}
+    updated_stories = Enum.reject(socket.assigns.stories, fn s -> s.id == story.id end)
+
+    {:noreply, assign(socket, stories: updated_stories)}
   end
 
   @impl true

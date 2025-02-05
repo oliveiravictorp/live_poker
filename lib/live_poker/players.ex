@@ -5,7 +5,6 @@ defmodule LivePoker.Players do
 
   import Ecto.Query, warn: false
   alias LivePoker.Repo
-
   alias LivePoker.Players.Player
 
   @doc """
@@ -46,9 +45,23 @@ defmodule LivePoker.Players do
         |> create_player()
 
       %Player{} = player ->
-        player
+        {:ok, player}
     end
   end
+
+  @doc """
+  Checks if a player is a moderator.
+
+  ## Examples
+
+      iex> is_moderator?(%Player{moderator: true})
+      true
+
+      iex> is_moderator?(%Player{moderator: false})
+      false
+
+  """
+  def is_moderator?(%Player{moderator: moderator}), do: moderator
 
   @doc """
   Gets a single player.
