@@ -3,18 +3,18 @@ defmodule LivePokerWeb.GameLive.Index do
 
   alias LivePoker.Games
   alias LivePoker.Games.Game
+  alias LivePoker.Players
 
   @impl true
   def mount(_params, _session, socket) do
     user_id = socket.assigns.current_user.id
 
     user_players =
-      LivePoker.Players.list_players_by_user(user_id)
+      Players.list_players_by_user(user_id)
 
     games_list =
       for user_player <- user_players do
         Games.get_game!(user_player.game_id)
-        |> check_moderator(user_player)
       end
 
     {:ok,
@@ -59,13 +59,13 @@ defmodule LivePokerWeb.GameLive.Index do
     {:noreply, stream_delete(socket, :games, game)}
   end
 
-  defp check_moderator(game, user_player) do
-    if user_player.moderator == true do
-      game
-      |> Map.put(:moderator, true)
+  defp check_moderator(game_id, user_id) do
+    {:ok, player} = Players.get_player_by_game_and_user(game_id, user_id)
+
+    if player.moderator do
+      true
     else
-      game
-      |> Map.put(:moderator, false)
+      false
     end
   end
 end

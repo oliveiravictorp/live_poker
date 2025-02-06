@@ -119,7 +119,7 @@
       <.back navigate={~p"/games"}>Back to games</.back>
     </article>
     <.header>
-      Play Game <%= @game.name %>
+      <%= @game.name %>
       <:subtitle><%= @game.description %></:subtitle>
       <:actions>
         <%= if @is_moderator do %>

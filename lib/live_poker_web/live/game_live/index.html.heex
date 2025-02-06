@@ -15,12 +15,12 @@
   <:col :let={{_id, game}} label="Name"><%= game.name %></:col>
   <:col :let={{_id, game}} label="Description"><%= game.description %></:col>
   <:action :let={{_id, game}}>
-    <%= if game.moderator == true do %>
+    <%= if check_moderator(game.id, @user_id) do %>
       <.link patch={~p"/games/#{game}/edit"}>Edit</.link>
     <% end %>
   </:action>
   <:action :let={{id, game}}>
-    <%= if game.moderator == true do %>
+    <%= if check_moderator(game.id, @user_id) do %>
       <.link
         phx-click={JS.push("delete", value: %{id: game.id}) |> hide("##{id}")}
         data-confirm="Are you sure?"
