@@ -54,6 +54,7 @@ defmodule LivePokerWeb.GameLive.Play do
     |> assign(:page_title, "Play game")
     |> assign(:game, Games.get_game!(game_id))
     |> stream(:players, Players.list_players_by_game(game_id))
+    |> stream(:moderators, Players.list_moderators_by_game(game_id))
     |> assign(:user_player, player)
     |> assign(:is_moderator, is_moderator)
     |> assign(:presences, presences)
@@ -98,6 +99,11 @@ defmodule LivePokerWeb.GameLive.Play do
   @impl true
   def handle_info({LivePokerWeb.GameLive.FormComponent, {:saved, game}}, socket) do
     {:noreply, assign(socket, game: game)}
+  end
+
+  @impl true
+  def handle_info({LivePokerWeb.GameLive.PlayerComponent, {:saved, _player}}, socket) do
+    {:noreply, socket}
   end
 
   @impl true
@@ -213,10 +219,8 @@ defmodule LivePokerWeb.GameLive.Play do
 
     votes_qtt = Stories.list_votes(story_id) |> length()
     players_qtt = Presence.list(topic) |> map_size()
-    # IO.puts("Votos: #{votes_qtt}, Jogadores Online: #{players_qtt}")
 
     if votes_qtt == players_qtt do
-      # IO.puts("Todos votaram! Calculando estimativa final...")
       calc_final_estimate(story_id)
     end
 
@@ -261,5 +265,12 @@ defmodule LivePokerWeb.GameLive.Play do
 
   defp is_online?(user_id, presences) do
     Map.has_key?(presences, to_string(user_id))
+  end
+
+  defp it_played?(player_id, story_id) do
+    case Stories.get_vote_by_player(player_id, story_id) do
+      nil -> false
+      _ -> true
+    end
   end
 end

@@ -26,7 +26,19 @@ defmodule LivePoker.Players do
   def list_players_by_game(game_id) do
     Repo.all(
       from p in Player,
-        where: p.game_id == ^game_id
+        where:
+          p.game_id == ^game_id and
+            p.moderator == false
+    )
+    |> Repo.preload(:user)
+  end
+
+  def list_moderators_by_game(game_id) do
+    Repo.all(
+      from p in Player,
+        where:
+          p.game_id == ^game_id and
+            p.moderator == true
     )
     |> Repo.preload(:user)
   end

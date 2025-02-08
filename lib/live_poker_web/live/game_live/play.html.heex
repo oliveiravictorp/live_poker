@@ -129,31 +129,43 @@
         <% end %>
       </:actions>
     </.header>
-
-    <.table id="players" rows={@streams.players}>
-      <:col :let={{_id, player}} label="Players"><%= player.user.name %></:col>
-      <:col :let={{_id, player}}>
+    <.table id="moderators" rows={@streams.moderators}>
+      <:col :let={{_id, player}} label="Moderators"><%= player.user.name %></:col>
+      <:col :let={{_id, player}} label="On">
         <%= if is_online?(player.user.id, @presences) do %>
-          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+          <div class="w-2 h-2 bg-green-500 rounded-full m-auto"></div>
         <% end %>
       </:col>
-      <%!--
-      <:col :let={{_id, player}} label="Moderator"><%= player.moderator %></:col>
-      <:col :let={{_id, player}} label="Spectator"><%= player.spectator %></:col>
-      --%>
+      <:col :let={{_id, player}} label="Voted">
+        <%= if @current_story != nil do %>
+          <%= if it_played?(player.id, @current_story.id) do %>
+            <div class="w-2 h-2 bg-blue-500 rounded-full m-auto"></div>
+          <% end %>
+        <% end %>
+      </:col>
       <:action :let={{_id, player}}>
         <%= if @is_moderator do %>
           <.link patch={~p"/game/#{@game}/player/#{player}/edit"}>Edit</.link>
         <% end %>
       </:action>
-      <:action :let={{id, player}}>
+    </.table>
+    <.table id="players" rows={@streams.players}>
+      <:col :let={{_id, player}} label="Players"><%= player.user.name %></:col>
+      <:col :let={{_id, player}} label="On">
+        <%= if is_online?(player.user.id, @presences) do %>
+          <div class="w-2 h-2 bg-green-500 rounded-full m-auto"></div>
+        <% end %>
+      </:col>
+      <:col :let={{_id, player}} label="Voted">
+        <%= if @current_story != nil do %>
+          <%= if it_played?(player.id, @current_story.id) do %>
+            <div class="w-2 h-2 bg-blue-500 rounded-full m-auto"></div>
+          <% end %>
+        <% end %>
+      </:col>
+      <:action :let={{_id, player}}>
         <%= if @is_moderator do %>
-          <.link
-            phx-click={JS.push("delete_player", value: %{id: player.id}) |> hide("##{id}")}
-            data-confirm="Are you sure?"
-          >
-            Delete
-          </.link>
+          <.link patch={~p"/game/#{@game}/player/#{player}/edit"}>Edit</.link>
         <% end %>
       </:action>
     </.table>
