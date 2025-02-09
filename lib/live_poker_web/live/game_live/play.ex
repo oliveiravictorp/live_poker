@@ -102,8 +102,16 @@ defmodule LivePokerWeb.GameLive.Play do
   end
 
   @impl true
-  def handle_info({LivePokerWeb.GameLive.PlayerComponent, {:saved, _player}}, socket) do
-    {:noreply, socket}
+  def handle_info({LivePokerWeb.GameLive.PlayerComponent, {:saved, player}}, socket) do
+    if player.moderator do
+      {:noreply,
+       socket
+       |> stream_delete(:players, player)}
+    else
+      {:noreply,
+       socket
+       |> stream_delete(:moderators, player)}
+    end
   end
 
   @impl true
@@ -229,10 +237,13 @@ defmodule LivePokerWeb.GameLive.Play do
 
   @impl true
   def handle_event("delete_story", %{"id" => id}, socket) do
+    game = socket.assigns.game
     story = Stories.get_story!(id)
     {:ok, _} = Stories.delete_story(story)
 
     updated_stories = Enum.reject(socket.assigns.stories, fn s -> s.id == story.id end)
+
+    Games.update_game(game, %{} |> Map.put("quantity_stories", game.quantity_stories - 1))
 
     {:noreply, assign(socket, stories: updated_stories)}
   end
