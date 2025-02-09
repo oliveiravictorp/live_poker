@@ -242,6 +242,8 @@ defmodule LivePokerWeb.GameLive.Play do
     player = Players.get_player!(id)
     {:ok, _} = Players.delete_player(player)
 
+    socket = push_patch(socket, to: ~p"/game/#{player.game_id}")
+
     {:noreply, stream_delete(socket, :players, player)}
   end
 

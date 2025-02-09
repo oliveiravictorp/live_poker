@@ -21,16 +21,14 @@ defmodule LivePokerWeb.GameLive.PlayerComponent do
       >
         <.input field={@form[:moderator]} type="checkbox" label="Moderator" />
         <%!--<.input field={@form[:spectator]} type="checkbox" label="Spectator" />--%>
-        <:actions>
-          <.button phx-disable-with="Saving...">Save player</.button>
-          <.button
-            phx-click={JS.push("delete_player", value: %{id: @player.id})}
-            data-confirm="Are you sure?"
-            phx-disable-with="Deleting..."
-          >
-            Delete player
-          </.button>
-        </:actions>
+        <.button phx-disable-with="Saving...">Save player</.button>
+        <.button
+          phx-click={JS.push("delete_player", value: %{id: @player.id})}
+          data-confirm="Are you sure?"
+          phx-disable-with="Deleting..."
+        >
+          Delete player
+        </.button>
       </.simple_form>
     </div>
     """
