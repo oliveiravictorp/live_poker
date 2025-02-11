@@ -84,6 +84,6 @@ defmodule LivePokerWeb.UserResetPasswordLive do
   end
 
   defp assign_form(socket, %{} = source) do
-    assign(socket, :form, to_form(source, as: "user"))
+    assign(socket, form: to_form(source, as: "user"))
   end
 end

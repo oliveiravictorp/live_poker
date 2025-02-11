@@ -30,20 +30,26 @@ defmodule LivePokerWeb.GameLive.Index do
 
   defp apply_action(socket, :edit, %{"game_id" => game_id}) do
     socket
-    |> assign(:page_title, "Edit game")
-    |> assign(:game, Games.get_game!(game_id))
+    |> assign(
+      page_title: "Edit game",
+      game: Games.get_game!(game_id)
+    )
   end
 
   defp apply_action(socket, :new, _params) do
     socket
-    |> assign(:page_title, "Create a new game")
-    |> assign(:game, %Game{})
+    |> assign(
+      page_title: "Create a new game",
+      game: %Game{}
+    )
   end
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Listing games")
-    |> assign(:game, nil)
+    |> assign(
+      page_title: "Listing games",
+      game: nil
+    )
   end
 
   @impl true

@@ -60,9 +60,7 @@ defmodule LivePokerWeb.GameLive.PlayerComponent do
 
   defp save_player(socket, :edit_player, player_params) do
     case Players.update_player(socket.assigns.player, player_params) do
-      {:ok, player} ->
-        notify_parent({:saved, player})
-
+      {:ok, _player} ->
         {:noreply,
          socket
          |> put_flash(:info, "Player updated successfully")
@@ -79,9 +77,7 @@ defmodule LivePokerWeb.GameLive.PlayerComponent do
       |> Map.put("user_id", socket.assigns.user_id)
 
     case Players.create_player(params) do
-      {:ok, player} ->
-        notify_parent({:saved, player})
-
+      {:ok, _player} ->
         {:noreply,
          socket
          |> put_flash(:info, "Player created successfully")
@@ -93,8 +89,6 @@ defmodule LivePokerWeb.GameLive.PlayerComponent do
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
-    assign(socket, :form, to_form(changeset))
+    assign(socket, form: to_form(changeset))
   end
-
-  defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 end

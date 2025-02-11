@@ -18,7 +18,7 @@ defmodule LivePokerWeb.GameLive.Play do
   end
 
   defp apply_action(socket, :play, %{"game_id" => game_id}) do
-    if connected?(socket), do: Stories.subscribe()
+    if connected?(socket), do: subscribe_pub_sub()
 
     new_story = %Story{}
     change_story = Stories.change_story(new_story)
@@ -29,16 +29,7 @@ defmodule LivePokerWeb.GameLive.Play do
 
     estimates = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, "?"]
 
-    current_story = Stories.get_current_story(game_id)
-
-    votes =
-      case current_story do
-        nil ->
-          nil
-
-        %Story{} = current_story ->
-          Stories.list_votes(current_story.id)
-      end
+    socket = socket |> current_votes(game_id)
 
     topic = "game:#{game_id}"
     user = socket.assigns.current_user
@@ -51,33 +42,37 @@ defmodule LivePokerWeb.GameLive.Play do
     is_moderator = Players.is_moderator?(player)
 
     socket
-    |> assign(:page_title, "Play game")
-    |> assign(:game, Games.get_game!(game_id))
     |> stream(:players, Players.list_players_by_game(game_id))
     |> stream(:moderators, Players.list_moderators_by_game(game_id))
-    |> assign(:user_player, player)
-    |> assign(:is_moderator, is_moderator)
-    |> assign(:presences, presences)
-    |> assign(:topic, topic)
-    |> assign(:story, new_story)
-    |> assign(:story_form, to_form(change_story))
-    |> assign(:stories, stories)
-    |> assign(:current_story, current_story)
-    |> assign(:votes, votes)
-    |> assign(:estimates, estimates)
-    |> assign(:new_story_available, new_story_available)
+    |> assign(
+      page_title: "Play game",
+      game: Games.get_game!(game_id),
+      story_form: to_form(change_story),
+      user_player: player,
+      is_moderator: is_moderator,
+      presences: presences,
+      topic: topic,
+      story: new_story,
+      stories: stories,
+      estimates: estimates,
+      new_story_available: new_story_available
+    )
   end
 
   defp apply_action(socket, :edit_game, %{"game_id" => game_id}) do
     socket
-    |> assign(:page_title, "Edit game")
-    |> assign(:game, Games.get_game!(game_id))
+    |> assign(
+      page_title: "Edit game",
+      game: Games.get_game!(game_id)
+    )
   end
 
   defp apply_action(socket, :edit_player, %{"player_id" => player_id}) do
     socket
-    |> assign(:page_title, "Edit player")
-    |> assign(:player, Players.get_player!(player_id))
+    |> assign(
+      page_title: "Edit player",
+      player: Players.get_player!(player_id)
+    )
   end
 
   @impl true
@@ -87,31 +82,43 @@ defmodule LivePokerWeb.GameLive.Play do
   end
 
   @impl true
-  def handle_info({:story_created, story}, socket) do
-    {:noreply, assign(socket, story: story)}
-  end
-
-  @impl true
-  def handle_info({__MODULE__, {:saved, story}}, socket) do
-    {:noreply, assign(socket, story: story)}
-  end
-
-  @impl true
-  def handle_info({LivePokerWeb.GameLive.FormComponent, {:saved, game}}, socket) do
+  def handle_info({:game_changed, game}, socket) do
     {:noreply, assign(socket, game: game)}
   end
 
   @impl true
-  def handle_info({LivePokerWeb.GameLive.PlayerComponent, {:saved, player}}, socket) do
-    if player.moderator do
-      {:noreply,
-       socket
-       |> stream_delete(:players, player)}
-    else
-      {:noreply,
-       socket
-       |> stream_delete(:moderators, player)}
-    end
+  def handle_info({:player_changed, player_changed}, socket) do
+    game_id = socket.assigns.game.id
+    {:ok, player} = Players.get_player_by_game_and_user(game_id, socket.assigns.current_user.id)
+    is_moderator = Players.is_moderator?(player)
+
+    socket = socket |> players_change_lists(player_changed)
+
+    {:noreply,
+     socket
+     |> stream(:players, Players.list_players_by_game(game_id))
+     |> stream(:moderators, Players.list_moderators_by_game(game_id))
+     |> assign(
+       user_player: player,
+       is_moderator: is_moderator
+     )}
+  end
+
+  @impl true
+  def handle_info({:story_changed, _story}, socket) do
+    game_id = socket.assigns.game.id
+
+    {:noreply,
+     assign(socket,
+       stories: Stories.list_stories(game_id),
+       current_story: Stories.get_current_story(game_id),
+       votes: Stories.list_votes(socket.assigns.current_story.id)
+     )}
+  end
+
+  @impl true
+  def handle_info({:vote_changed, _vote}, socket) do
+    {:noreply, socket |> current_votes(socket.assigns.game.id)}
   end
 
   @impl true
@@ -123,7 +130,7 @@ defmodule LivePokerWeb.GameLive.Play do
 
     {:noreply,
      socket
-     |> assign(:story_form, to_form(change_story))}
+     |> assign(story_form: to_form(change_story))}
   end
 
   @impl true
@@ -138,12 +145,7 @@ defmodule LivePokerWeb.GameLive.Play do
 
     case Stories.create_story(story_params) do
       {:ok, story} ->
-        game_params =
-          %{}
-          |> Map.put("quantity_stories", story.sequence_number)
-
-        Games.update_game(game, game_params)
-        notify_parent({:saved, story})
+        Games.update_game(game, %{} |> Map.put("quantity_stories", story.sequence_number))
 
         {:noreply,
          socket
@@ -153,7 +155,7 @@ defmodule LivePokerWeb.GameLive.Play do
       {:error, %Ecto.Changeset{} = change_story} ->
         {:noreply,
          socket
-         |> assign(:story_form, to_form(change_story))}
+         |> assign(story_form: to_form(change_story))}
     end
   end
 
@@ -188,6 +190,19 @@ defmodule LivePokerWeb.GameLive.Play do
     calc_final_estimate(id)
 
     {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
+  end
+
+  @impl true
+  def handle_event("delete_story", %{"id" => id}, socket) do
+    game = socket.assigns.game
+    story = Stories.get_story!(id)
+    {:ok, _} = Stories.delete_story(story)
+
+    updated_stories = Enum.reject(socket.assigns.stories, fn s -> s.id == story.id end)
+
+    Games.update_game(game, %{} |> Map.put("quantity_stories", game.quantity_stories - 1))
+
+    {:noreply, assign(socket, stories: updated_stories, new_story_available: 0)}
   end
 
   @impl true
@@ -236,19 +251,6 @@ defmodule LivePokerWeb.GameLive.Play do
   end
 
   @impl true
-  def handle_event("delete_story", %{"id" => id}, socket) do
-    game = socket.assigns.game
-    story = Stories.get_story!(id)
-    {:ok, _} = Stories.delete_story(story)
-
-    updated_stories = Enum.reject(socket.assigns.stories, fn s -> s.id == story.id end)
-
-    Games.update_game(game, %{} |> Map.put("quantity_stories", game.quantity_stories - 1))
-
-    {:noreply, assign(socket, stories: updated_stories)}
-  end
-
-  @impl true
   def handle_event("delete_player", %{"id" => id}, socket) do
     player = Players.get_player!(id)
     {:ok, _} = Players.delete_player(player)
@@ -258,7 +260,24 @@ defmodule LivePokerWeb.GameLive.Play do
     {:noreply, stream_delete(socket, :players, player)}
   end
 
-  defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+  defp current_votes(socket, game_id) do
+    current_story = Stories.get_current_story(game_id)
+
+    votes =
+      case current_story do
+        nil ->
+          nil
+
+        %Story{} = current_story ->
+          Stories.list_votes(current_story.id)
+      end
+
+    socket
+    |> assign(
+      current_story: current_story,
+      votes: votes
+    )
+  end
 
   defp calc_final_estimate(story_id) do
     final_estimate =
@@ -285,5 +304,22 @@ defmodule LivePokerWeb.GameLive.Play do
       nil -> false
       _ -> true
     end
+  end
+
+  defp players_change_lists(socket, player) do
+    if player.moderator do
+      socket
+      |> stream_delete(:players, player)
+    else
+      socket
+      |> stream_delete(:moderators, player)
+    end
+  end
+
+  defp subscribe_pub_sub() do
+    Games.subscribe_games()
+    Players.subscribe_players()
+    Stories.subscribe_stories()
+    Stories.subscribe_votes()
   end
 end

@@ -53,6 +53,7 @@ defmodule LivePoker.Games do
     %Game{}
     |> Game.changeset(attrs)
     |> Repo.insert()
+    |> broadcast_games(:game_changed)
   end
 
   @doc """
@@ -71,6 +72,7 @@ defmodule LivePoker.Games do
     game
     |> Game.changeset(attrs)
     |> Repo.update()
+    |> broadcast_games(:game_changed)
   end
 
   @doc """
@@ -87,6 +89,7 @@ defmodule LivePoker.Games do
   """
   def delete_game(%Game{} = game) do
     Repo.delete(game)
+    |> broadcast_games(:game_changed)
   end
 
   @doc """
@@ -100,5 +103,16 @@ defmodule LivePoker.Games do
   """
   def change_game(%Game{} = game, attrs \\ %{}) do
     Game.changeset(game, attrs)
+  end
+
+  def subscribe_games() do
+    Phoenix.PubSub.subscribe(LivePoker.PubSub, "games")
+  end
+
+  defp broadcast_games({:error, _reason} = error, _event), do: error
+
+  defp broadcast_games({:ok, game}, event) do
+    Phoenix.PubSub.broadcast(LivePoker.PubSub, "games", {event, game})
+    {:ok, game}
   end
 end

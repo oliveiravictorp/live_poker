@@ -107,6 +107,7 @@ defmodule LivePoker.Players do
     %Player{}
     |> Player.changeset(attrs)
     |> Repo.insert()
+    |> broadcast_players(:player_changed)
   end
 
   @doc """
@@ -125,6 +126,7 @@ defmodule LivePoker.Players do
     player
     |> Player.changeset(attrs)
     |> Repo.update()
+    |> broadcast_players(:player_changed)
   end
 
   @doc """
@@ -141,6 +143,7 @@ defmodule LivePoker.Players do
   """
   def delete_player(%Player{} = player) do
     Repo.delete(player)
+    |> broadcast_players(:player_changed)
   end
 
   @doc """
@@ -154,5 +157,16 @@ defmodule LivePoker.Players do
   """
   def change_player(%Player{} = player, attrs \\ %{}) do
     Player.changeset(player, attrs)
+  end
+
+  def subscribe_players() do
+    Phoenix.PubSub.subscribe(LivePoker.PubSub, "players")
+  end
+
+  defp broadcast_players({:error, _reason} = error, _event), do: error
+
+  defp broadcast_players({:ok, player}, event) do
+    Phoenix.PubSub.broadcast(LivePoker.PubSub, "players", {event, player})
+    {:ok, player}
   end
 end

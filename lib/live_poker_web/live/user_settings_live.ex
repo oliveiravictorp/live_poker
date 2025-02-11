@@ -104,13 +104,15 @@ defmodule LivePokerWeb.UserSettingsLive do
 
     socket =
       socket
-      |> assign(:current_password, nil)
-      |> assign(:email_form_current_password, nil)
-      |> assign(:current_email, user.email)
-      |> assign(:name_form, to_form(name_changeset))
-      |> assign(:email_form, to_form(email_changeset))
-      |> assign(:password_form, to_form(password_changeset))
-      |> assign(:trigger_submit, false)
+      |> assign(
+        current_password: nil,
+        email_form_current_password: nil,
+        current_email: user.email,
+        name_form: to_form(name_changeset),
+        email_form: to_form(email_changeset),
+        password_form: to_form(password_changeset),
+        trigger_submit: false
+      )
 
     {:ok, socket}
   end
@@ -162,7 +164,7 @@ defmodule LivePokerWeb.UserSettingsLive do
         {:noreply, socket |> put_flash(:info, info) |> assign(email_form_current_password: nil)}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, :email_form, to_form(Map.put(changeset, :action, :insert)))}
+        {:noreply, assign(socket, email_form: to_form(Map.put(changeset, :action, :insert)))}
     end
   end
 

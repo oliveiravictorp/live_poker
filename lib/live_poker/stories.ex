@@ -75,7 +75,7 @@ defmodule LivePoker.Stories do
     %Story{}
     |> Story.changeset(attrs)
     |> Repo.insert()
-    |> broadcast(:story_created)
+    |> broadcast_stories(:story_changed)
   end
 
   @doc """
@@ -94,7 +94,7 @@ defmodule LivePoker.Stories do
     story
     |> Story.changeset(attrs)
     |> Repo.update()
-    |> broadcast(:story_created)
+    |> broadcast_stories(:story_changed)
   end
 
   @doc """
@@ -111,6 +111,7 @@ defmodule LivePoker.Stories do
   """
   def delete_story(%Story{} = story) do
     Repo.delete(story)
+    |> broadcast_stories(:story_changed)
   end
 
   @doc """
@@ -186,6 +187,7 @@ defmodule LivePoker.Stories do
     %Vote{}
     |> Vote.changeset(attrs)
     |> Repo.insert()
+    |> broadcast_votes(:vote_changed)
   end
 
   @doc """
@@ -204,6 +206,7 @@ defmodule LivePoker.Stories do
     vote
     |> Vote.changeset(attrs)
     |> Repo.update()
+    |> broadcast_votes(:vote_changed)
   end
 
   @doc """
@@ -220,10 +223,12 @@ defmodule LivePoker.Stories do
   """
   def delete_vote(%Vote{} = vote) do
     Repo.delete(vote)
+    |> broadcast_votes(:vote_changed)
   end
 
   def delete_all_votes(story_id) do
     query = from(v in Vote, where: v.story_id == ^story_id)
+
     Repo.delete_all(query)
   end
 
@@ -240,14 +245,25 @@ defmodule LivePoker.Stories do
     Vote.changeset(vote, attrs)
   end
 
-  def subscribe() do
+  def subscribe_stories() do
     Phoenix.PubSub.subscribe(LivePoker.PubSub, "stories")
   end
 
-  defp broadcast({:error, _reason} = error, _event), do: error
+  defp broadcast_stories({:error, _reason} = error, _event), do: error
 
-  defp broadcast({:ok, story}, event) do
+  defp broadcast_stories({:ok, story}, event) do
     Phoenix.PubSub.broadcast(LivePoker.PubSub, "stories", {event, story})
     {:ok, story}
+  end
+
+  def subscribe_votes() do
+    Phoenix.PubSub.subscribe(LivePoker.PubSub, "votes")
+  end
+
+  defp broadcast_votes({:error, _reason} = error, _event), do: error
+
+  defp broadcast_votes({:ok, vote}, event) do
+    Phoenix.PubSub.broadcast(LivePoker.PubSub, "votes", {event, vote})
+    {:ok, vote}
   end
 end

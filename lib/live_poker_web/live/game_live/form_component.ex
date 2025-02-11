@@ -76,8 +76,6 @@ defmodule LivePokerWeb.GameLive.FormComponent do
         |> Map.put("moderator", true)
         |> Players.create_player()
 
-        notify_parent({:saved, game})
-
         {:noreply,
          socket
          |> put_flash(:info, "Game created successfully")
@@ -89,16 +87,12 @@ defmodule LivePokerWeb.GameLive.FormComponent do
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
-    assign(socket, :form, to_form(changeset))
+    assign(socket, form: to_form(changeset))
   end
-
-  defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
   defp edit_game(socket, game_params) do
     case Games.update_game(socket.assigns.game, game_params) do
-      {:ok, game} ->
-        notify_parent({:saved, game})
-
+      {:ok, _game} ->
         {:noreply,
          socket
          |> put_flash(:info, "Game updated successfully")
