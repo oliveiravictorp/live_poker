@@ -106,19 +106,33 @@ defmodule LivePokerWeb.GameLive.Play do
 
   @impl true
   def handle_info({:story_changed, _story}, socket) do
-    game_id = socket.assigns.game.id
+    %{game: %{id: game_id}, current_story: current_story} = socket.assigns
 
     {:noreply,
-     assign(socket,
+     socket
+     |> assign(
        stories: Stories.list_stories(game_id),
        current_story: Stories.get_current_story(game_id),
-       votes: Stories.list_votes(socket.assigns.current_story.id)
-     )}
+       votes:
+         if current_story do
+           Stories.list_votes(current_story.id)
+         else
+           []
+         end
+     )
+     |> stream(:players, Players.list_players_by_game(game_id))
+     |> stream(:moderators, Players.list_moderators_by_game(game_id))}
   end
 
   @impl true
   def handle_info({:vote_changed, _vote}, socket) do
-    {:noreply, socket |> current_votes(socket.assigns.game.id)}
+    game_id = socket.assigns.game.id
+
+    {:noreply,
+     socket
+     |> current_votes(game_id)
+     |> stream(:players, Players.list_players_by_game(game_id))
+     |> stream(:moderators, Players.list_moderators_by_game(game_id))}
   end
 
   @impl true

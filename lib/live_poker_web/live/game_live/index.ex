@@ -7,20 +7,15 @@ defmodule LivePokerWeb.GameLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Games.subscribe_games()
+
     user_id = socket.assigns.current_user.id
 
-    user_players =
-      Players.list_players_by_user(user_id)
-
-    games_list =
-      for user_player <- user_players do
-        Games.get_game!(user_player.game_id)
-      end
+    socket = get_user_games(socket)
 
     {:ok,
      socket
-     |> assign(user_id: user_id)
-     |> stream(:games, games_list)}
+     |> assign(user_id: user_id)}
   end
 
   @impl true
@@ -53,8 +48,8 @@ defmodule LivePokerWeb.GameLive.Index do
   end
 
   @impl true
-  def handle_info({LivePokerWeb.GameLive.FormComponent, {:saved, game}}, socket) do
-    {:noreply, stream_insert(socket, :games, game)}
+  def handle_info({:game_changed, _game}, socket) do
+    {:noreply, get_user_games(socket)}
   end
 
   @impl true
@@ -73,5 +68,17 @@ defmodule LivePokerWeb.GameLive.Index do
     else
       false
     end
+  end
+
+  defp get_user_games(socket) do
+    user_players =
+      Players.list_players_by_user(socket.assigns.current_user.id)
+
+    games_list =
+      for user_player <- user_players do
+        Games.get_game!(user_player.game_id)
+      end
+
+    stream(socket, :games, games_list)
   end
 end
