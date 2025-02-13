@@ -77,8 +77,14 @@ defmodule LivePokerWeb.GameLive.Play do
 
   @impl true
   def handle_info(%{event: "presence_diff"}, socket) do
-    presences = Presence.list(socket.assigns.topic)
-    {:noreply, assign(socket, presences: presences)}
+    %{game: %{id: game_id}, topic: topic} = socket.assigns
+    presences = Presence.list(topic)
+
+    {:noreply,
+     socket
+     |> assign(presences: presences)
+     |> stream(:players, Players.list_players_by_game(game_id))
+     |> stream(:moderators, Players.list_moderators_by_game(game_id))}
   end
 
   @impl true
@@ -88,8 +94,9 @@ defmodule LivePokerWeb.GameLive.Play do
 
   @impl true
   def handle_info({:player_changed, player_changed}, socket) do
-    game_id = socket.assigns.game.id
-    {:ok, player} = Players.get_player_by_game_and_user(game_id, socket.assigns.current_user.id)
+    %{game: %{id: game_id}, current_user: current_user} = socket.assigns
+
+    {:ok, player} = Players.get_player_by_game_and_user(game_id, current_user.id)
     is_moderator = Players.is_moderator?(player)
 
     socket = socket |> players_change_lists(player_changed)
