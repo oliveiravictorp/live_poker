@@ -19,6 +19,6 @@ defmodule LivePoker.Stories.Story do
   def changeset(story, attrs \\ %{}) do
     story
     |> cast(attrs, [:sequence_number, :name, :description, :final_estimate, :finished, :game_id])
-    |> validate_required([:sequence_number, :name, :final_estimate, :finished, :game_id])
+    |> validate_required([:sequence_number, :name, :finished, :game_id])
   end
 end

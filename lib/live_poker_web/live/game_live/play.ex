@@ -161,7 +161,6 @@ defmodule LivePokerWeb.GameLive.Play do
     story_params =
       story_params
       |> Map.put("sequence_number", game.quantity_stories + 1)
-      |> Map.put("final_estimate", 0)
       |> Map.put("game_id", game.id)
 
     case Stories.create_story(story_params) do
@@ -198,7 +197,7 @@ defmodule LivePokerWeb.GameLive.Play do
 
     attrs =
       %{}
-      |> Map.put("final_estimate", 0)
+      |> Map.put("final_estimate", nil)
 
     Stories.get_story!(id)
     |> Stories.update_story(attrs)
