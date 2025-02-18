@@ -1,7 +1,7 @@
 <container class="flex">
   <section class="grow pr-7">
     <%= if @is_moderator do %>
-      <article class="rounded overflow-hidden shadow-lg pr-6 pb-6 pl-6">
+      <article class="rounded overflow-hidden shadow-lg pr-6 pb-6 pl-6 mb-4">
         <.simple_form
           for={@story_form}
           id="story-form"
@@ -31,6 +31,13 @@
           </:actions>
         </.simple_form>
       </article>
+    <% else %>
+      <%= if @stories == [] do %>
+        <article class="rounded overflow-hidden shadow-lg p-6 aling text-center">
+          <img src={~p"/images/cat.svg"} alt="Sleeping cat" class="mx-auto" />
+          <p>Wait for a new round to start.</p>
+        </article>
+      <% end %>
     <% end %>
     <%= for story <- @stories do %>
       <article class="rounded overflow-hidden shadow-lg p-6 mb-4">
@@ -193,6 +200,7 @@
         <% end %>
       </:action>
     </.table>
+    <p class="mt-8">Copy the address in your browser and share with team members.</p>
   </aside>
 </container>
 <.modal
