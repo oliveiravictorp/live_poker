@@ -32,7 +32,7 @@
         </.simple_form>
       </article>
     <% else %>
-      <%= if @stories == [] do %>
+      <%= if @current_story == nil do %>
         <article class="rounded overflow-hidden shadow-lg p-6 aling text-center">
           <img src={~p"/images/cat.svg"} alt="Sleeping cat" class="mx-auto" />
           <p>Wait for a new round to start.</p>

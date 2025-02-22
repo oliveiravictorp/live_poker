@@ -180,7 +180,7 @@ defmodule LivePokerWeb.GameLive.Play do
   end
 
   @impl true
-  def handle_event("accept_story", %{"id" => id, "game_id" => game_id}, socket) do
+  def handle_event("accept_story", %{"id" => id, "game_id" => _game_id}, socket) do
     attrs =
       %{}
       |> Map.put("finished", true)
@@ -188,11 +188,12 @@ defmodule LivePokerWeb.GameLive.Play do
     Stories.get_story!(id)
     |> Stories.update_story(attrs)
 
-    {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
+    # {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
+    {:noreply, socket}
   end
 
   @impl true
-  def handle_event("restart_story", %{"id" => id, "game_id" => game_id}, socket) do
+  def handle_event("restart_story", %{"id" => id, "game_id" => _game_id}, socket) do
     Stories.delete_all_votes(id)
 
     attrs =
@@ -202,14 +203,14 @@ defmodule LivePokerWeb.GameLive.Play do
     Stories.get_story!(id)
     |> Stories.update_story(attrs)
 
-    {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
+    {:noreply, socket}
   end
 
   @impl true
-  def handle_event("reveal_cards", %{"id" => id, "game_id" => game_id}, socket) do
+  def handle_event("reveal_cards", %{"id" => id, "game_id" => _game_id}, socket) do
     calc_final_estimate(id)
 
-    {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
+    {:noreply, socket}
   end
 
   @impl true
@@ -232,7 +233,7 @@ defmodule LivePokerWeb.GameLive.Play do
           "estimate" => estimate,
           "player_id" => player_id,
           "story_id" => story_id,
-          "game_id" => game_id,
+          "game_id" => _game_id,
           "topic" => topic
         },
         socket
@@ -267,7 +268,7 @@ defmodule LivePokerWeb.GameLive.Play do
       calc_final_estimate(story_id)
     end
 
-    {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
+    {:noreply, socket}
   end
 
   @impl true
