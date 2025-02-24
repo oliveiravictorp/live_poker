@@ -29,14 +29,14 @@ defmodule LivePokerWeb.GameLive.Play do
 
     estimates = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, "?"]
 
-    socket = socket |> current_votes(game_id)
-
     topic = "game:#{game_id}"
     user = socket.assigns.current_user
 
     LivePokerWeb.Endpoint.subscribe(topic)
     Presence.track(self(), topic, user.id, user)
     presences = Presence.list(topic)
+
+    socket = socket |> current_votes(game_id, presences)
 
     {:ok, player} = Players.get_player_by_game_and_user(game_id, user.id)
     is_moderator = Players.is_moderator?(player)
@@ -55,7 +55,8 @@ defmodule LivePokerWeb.GameLive.Play do
       story: new_story,
       stories: stories,
       estimates: estimates,
-      new_story_available: new_story_available
+      new_story_available: new_story_available,
+      players_qtt: presences |> map_size()
     )
   end
 
@@ -82,7 +83,11 @@ defmodule LivePokerWeb.GameLive.Play do
 
     {:noreply,
      socket
-     |> assign(presences: presences)
+     |> assign(
+       presences: presences,
+       players_qtt: presences |> map_size()
+     )
+     |> current_votes(game_id, presences)
      |> stream(:players, Players.list_players_by_game(game_id))
      |> stream(:moderators, Players.list_moderators_by_game(game_id))}
   end
@@ -94,7 +99,7 @@ defmodule LivePokerWeb.GameLive.Play do
 
   @impl true
   def handle_info({:player_changed, player_changed}, socket) do
-    %{game: %{id: game_id}, current_user: current_user} = socket.assigns
+    %{game: %{id: game_id}, current_user: current_user, topic: topic} = socket.assigns
 
     {:ok, player} = Players.get_player_by_game_and_user(game_id, current_user.id)
     is_moderator = Players.is_moderator?(player)
@@ -107,7 +112,8 @@ defmodule LivePokerWeb.GameLive.Play do
      |> stream(:moderators, Players.list_moderators_by_game(game_id))
      |> assign(
        user_player: player,
-       is_moderator: is_moderator
+       is_moderator: is_moderator,
+       presences: Presence.list(topic)
      )}
   end
 
@@ -133,11 +139,11 @@ defmodule LivePokerWeb.GameLive.Play do
 
   @impl true
   def handle_info({:vote_changed, _vote}, socket) do
-    game_id = socket.assigns.game.id
+    %{game: %{id: game_id}, presences: presences} = socket.assigns
 
     {:noreply,
      socket
-     |> current_votes(game_id)
+     |> current_votes(game_id, presences)
      |> stream(:players, Players.list_players_by_game(game_id))
      |> stream(:moderators, Players.list_moderators_by_game(game_id))}
   end
@@ -189,7 +195,7 @@ defmodule LivePokerWeb.GameLive.Play do
     |> Stories.update_story(attrs)
 
     # {:noreply, socket |> push_patch(to: ~p"/game/#{game_id}")}
-    {:noreply, socket}
+    {:noreply, assign(socket, new_story_available: 0)}
   end
 
   @impl true
@@ -261,14 +267,26 @@ defmodule LivePokerWeb.GameLive.Play do
         Stories.update_vote(vote, attrs)
     end
 
-    votes_qtt = Stories.list_votes(story_id) |> length()
-    players_qtt = Presence.list(topic) |> map_size()
+    presences = Presence.list(topic)
 
-    if votes_qtt == players_qtt do
+    online_votes =
+      Stories.list_votes(story_id)
+      |> Enum.filter(fn vote ->
+        Map.has_key?(presences, to_string(vote.player.user_id))
+      end)
+
+    votes_qtt = online_votes |> length()
+    players_qtt = presences |> map_size()
+
+    if votes_qtt >= players_qtt do
       calc_final_estimate(story_id)
     end
 
-    {:noreply, socket}
+    {:noreply,
+     assign(socket,
+       votes_qtt: votes_qtt,
+       players_qtt: players_qtt
+     )}
   end
 
   @impl true
@@ -281,23 +299,32 @@ defmodule LivePokerWeb.GameLive.Play do
     {:noreply, stream_delete(socket, :players, player)}
   end
 
-  defp current_votes(socket, game_id) do
+  defp current_votes(socket, game_id, presences) do
     current_story = Stories.get_current_story(game_id)
 
-    votes =
-      case current_story do
-        nil ->
-          nil
+    case current_story do
+      nil ->
+        socket
+        |> assign(
+          current_story: current_story,
+          votes: nil,
+          votes_qtt: 0
+        )
 
-        %Story{} = current_story ->
+      %Story{} = current_story ->
+        online_votes =
           Stories.list_votes(current_story.id)
-      end
+          |> Enum.filter(fn vote ->
+            Map.has_key?(presences, to_string(vote.player.user_id))
+          end)
 
-    socket
-    |> assign(
-      current_story: current_story,
-      votes: votes
-    )
+        socket
+        |> assign(
+          current_story: current_story,
+          votes: Stories.list_votes(current_story.id),
+          votes_qtt: online_votes |> length()
+        )
+    end
   end
 
   defp calc_final_estimate(story_id) do

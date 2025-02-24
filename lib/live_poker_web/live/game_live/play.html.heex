@@ -18,10 +18,7 @@
             <%= if @new_story_available == 0 do %>
               <.button>Add story</.button>
             <% else %>
-              <.button
-                disabled
-                class="opacity-50 hover:bg-zinc-900 cursor-default active:text-white"
-              >
+              <.button disabled class="opacity-50 hover:bg-zinc-900 cursor-default">
                 Add story
               </.button>
               <%= if @stories != [] do %>
@@ -76,6 +73,9 @@
                   <span class="text-sm"><%= vote.player.user.name %></span>
                 </div>
               <% end %>
+              <div class="ml-auto mt-auto">
+                <%= @votes_qtt %> of <%= @players_qtt %> players
+              </div>
             <% end %>
           </div>
           <div class="flex rounded overflow-hidden shadow-lg p-5 mb-3">
@@ -110,15 +110,15 @@
                   Accept round
                 </.button>
               <% else %>
-                <.button class="opacity-50 hover:bg-zinc-900 cursor-default active:text-white">
+                <.button class="opacity-50 hover:bg-zinc-900 cursor-default">
                   Accept round
                 </.button>
               <% end %>
               <%= if Enum.empty?(@votes) do %>
-                <.button class="opacity-50 hover:bg-zinc-900 cursor-default active:text-white">
+                <.button class="opacity-50 hover:bg-zinc-900 cursor-default">
                   Play again
                 </.button>
-                <.button class="opacity-50 hover:bg-zinc-900 cursor-default active:text-white">
+                <.button class="opacity-50 hover:bg-zinc-900 cursor-default">
                   Reveal cards
                 </.button>
               <% else %>
