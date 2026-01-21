@@ -52,6 +52,15 @@ defmodule LivePokerWeb.UserSettingsLive do
             phx-submit="update_password"
             phx-trigger-action={@trigger_submit}
           >
+            <.input
+              field={@password_form[:current_password]}
+              name="current_password"
+              type="password"
+              label="Current password"
+              id="current_password_for_password"
+              value={@current_password}
+              required
+            />
             <input
               name={@password_form[:email].name}
               type="hidden"
@@ -63,15 +72,6 @@ defmodule LivePokerWeb.UserSettingsLive do
               field={@password_form[:password_confirmation]}
               type="password"
               label="Confirm new password"
-            />
-            <.input
-              field={@password_form[:current_password]}
-              name="current_password"
-              type="password"
-              label="Current password"
-              id="current_password_for_password"
-              value={@current_password}
-              required
             />
             <:actions>
               <.button phx-disable-with="Changing...">Change password</.button>
