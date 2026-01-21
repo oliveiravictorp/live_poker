@@ -28,6 +28,13 @@
       >
         Delete
       </.link>
+    <% else %>
+      <.link
+        phx-click={JS.push("leave_game", value: %{game_id: game.id})}
+        data-confirm="Are you sure you want to leave this game?"
+      >
+        Leave
+      </.link>
     <% end %>
   </:action>
 </.table>

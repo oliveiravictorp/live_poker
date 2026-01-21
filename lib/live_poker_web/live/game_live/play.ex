@@ -357,10 +357,10 @@ defmodule LivePokerWeb.GameLive.Play do
   defp players_change_lists(socket, player) do
     if player.moderator do
       socket
-      |> stream_delete(:players, player)
+      |> stream_delete(:moderators, player)
     else
       socket
-      |> stream_delete(:moderators, player)
+      |> stream_delete(:players, player)
     end
   end
 

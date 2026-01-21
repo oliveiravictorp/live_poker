@@ -60,6 +60,19 @@ defmodule LivePokerWeb.GameLive.Index do
     {:noreply, stream_delete(socket, :games, game)}
   end
 
+  @impl true
+  def handle_event("leave_game", %{"game_id" => game_id}, socket) do
+    user_id = socket.assigns.current_user.id
+
+    {:ok, player} = Players.get_player_by_game_and_user(game_id, user_id)
+
+    {:ok, _} = Players.delete_player(player)
+
+    game = Games.get_game!(game_id)
+
+    {:noreply, stream_delete(socket, :games, game)}
+  end
+
   defp check_moderator(game_id, user_id) do
     {:ok, player} = Players.get_player_by_game_and_user(game_id, user_id)
 
